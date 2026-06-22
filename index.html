@@ -202,6 +202,48 @@
       flex-wrap: wrap;
       border-top: 2px solid #c0140a;
       box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+      max-height: 70vh;
+      overflow-y: auto;
+      transition: max-height 0.25s ease, padding 0.25s ease, opacity 0.2s ease;
+    }
+
+    /* Collapsed state — toolbar tucked away, just the toggle button shows */
+    .toolbar.collapsed {
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      opacity: 0;
+      overflow: hidden;
+      border-top: none;
+      box-shadow: none;
+      pointer-events: none;
+    }
+
+    /* Floating toggle button — always visible, opens/closes the toolbar */
+    .toolbar-toggle {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 1000;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid #c0140a;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #f5c800;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease;
+    }
+    .toolbar-toggle:hover { transform: scale(1.08); }
+    .toolbar-toggle:active { transform: scale(0.95); }
+
+    @media print {
+      .toolbar-toggle { display: none; }
     }
 
     /* action buttons */
@@ -532,7 +574,9 @@
   </footer>
   </div>
 
-  <div class="toolbar">
+  <button class="toolbar-toggle" id="toolbar-toggle" onclick="toggleToolbar()" title="Open editor options" aria-label="Open editor options">⚙</button>
+
+  <div class="toolbar collapsed" id="toolbar">
 
     <!-- IMAGES dropdown -->
     <div class="dd-wrap">
@@ -581,7 +625,6 @@
     <div class="toolbar-divider"></div>
 
     <!-- ACTION BUTTONS -->
-    <button class="btn btn-save"  onclick="savePage()">💾 Save</button>
     <button class="btn btn-jpg"   onclick="downloadJPG()">⬇ JPG</button>
     <button class="btn btn-print" onclick="window.print()">🖨 Print</button>
     <button class="btn btn-clear" onclick="clearAll()">🗑 Clear</button>
@@ -653,7 +696,7 @@
       reader.readAsDataURL(file);
     }
 
-    // legacy shim (used nowhere now but keeps savePage safe)
+    // legacy shim (used nowhere now)
     function loadPhoto(input, imgId, phId) {
       loadSlotPhoto(input, imgId.replace('img',''));
     }
@@ -692,18 +735,13 @@
       sel.removeAllRanges();
     }
 
-    function savePage() {
-      const clone = document.documentElement.cloneNode(true);
-      clone.querySelector('.toolbar').remove();
-      clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
-      clone.querySelectorAll('input[type=file]').forEach(el => el.remove());
-      clone.querySelectorAll('.upload-btn').forEach(el => el.remove());
-      const html = '<!DOCTYPE html>\n' + clone.outerHTML;
-      const blob = new Blob([html], {type:'text/html'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'veguchukka_' + d.getFullYear() + '_' + String(d.getMonth()+1).padStart(2,'0') + '_' + String(d.getDate()).padStart(2,'0') + '.html';
-      a.click();
+    // ── TOOLBAR TOGGLE (mobile-friendly collapsible options panel) ──
+    function toggleToolbar() {
+      const bar = document.getElementById('toolbar');
+      const btn = document.getElementById('toolbar-toggle');
+      const isCollapsed = bar.classList.toggle('collapsed');
+      btn.textContent = isCollapsed ? '⚙' : '✖';
+      btn.title = isCollapsed ? 'Open editor options' : 'Close editor options';
     }
 
     function downloadJPG() {
