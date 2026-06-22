@@ -219,7 +219,8 @@
       pointer-events: none;
     }
 
-    /* Floating toggle button — always visible, opens/closes the toolbar */
+    /* Floating toggle button — always visible, opens/closes the toolbar,
+       and can be dragged anywhere on screen (see toolbar-toggle drag JS) */
     .toolbar-toggle {
       position: fixed;
       bottom: 16px;
@@ -235,12 +236,21 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
+      cursor: grab;
       box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-      transition: transform 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     .toolbar-toggle:hover { transform: scale(1.08); }
-    .toolbar-toggle:active { transform: scale(0.95); }
+    .toolbar-toggle:active,
+    .toolbar-toggle.dragging {
+      cursor: grabbing;
+      transform: scale(0.96);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.65);
+    }
 
     @media print {
       .toolbar-toggle { display: none; }
@@ -560,7 +570,7 @@
 
       <div class="text-block">
         <div class="headline" contenteditable="true">HEADLINE</div>
-        <div class="matter" contenteditable="true">news content</div>
+        <div class="matter" contenteditable="true">ARTICLE CONTENT</div>
       </div>
       </div><!-- end news-body -->
 
@@ -743,6 +753,111 @@
       btn.textContent = isCollapsed ? '⚙' : '✖';
       btn.title = isCollapsed ? 'Open editor options' : 'Close editor options';
     }
+
+    // ── FLOATING BUTTON — DRAGGABLE ON ANY SCREEN (mouse + touch) ──
+    (function initDraggableToggle() {
+      const btn = document.getElementById('toolbar-toggle');
+      if (!btn) return;
+
+      let startX = 0, startY = 0;     // pointer position at drag start
+      let originLeft = 0, originTop = 0; // button position at drag start
+      let dragging = false;
+      let moved = false;              // did the pointer move enough to count as a drag?
+      const DRAG_THRESHOLD = 6;       // px of movement before it's treated as a drag, not a tap
+
+      function clampToViewport(left, top) {
+        const margin = 4;
+        const maxLeft = window.innerWidth - btn.offsetWidth - margin;
+        const maxTop = window.innerHeight - btn.offsetHeight - margin;
+        return {
+          left: Math.min(Math.max(left, margin), Math.max(maxLeft, margin)),
+          top: Math.min(Math.max(top, margin), Math.max(maxTop, margin))
+        };
+      }
+
+      // Switch the button from bottom/right anchoring to explicit left/top
+      // the first time it's dragged, so it can be placed anywhere.
+      function ensureLeftTopPositioning() {
+        if (btn.dataset.freePositioned === '1') return;
+        const rect = btn.getBoundingClientRect();
+        btn.style.left = rect.left + 'px';
+        btn.style.top = rect.top + 'px';
+        btn.style.right = 'auto';
+        btn.style.bottom = 'auto';
+        btn.dataset.freePositioned = '1';
+      }
+
+      function onPointerDown(e) {
+        const point = e.touches ? e.touches[0] : e;
+        dragging = true;
+        moved = false;
+        startX = point.clientX;
+        startY = point.clientY;
+        const rect = btn.getBoundingClientRect();
+        originLeft = rect.left;
+        originTop = rect.top;
+        btn.classList.add('dragging');
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+        window.addEventListener('touchmove', onPointerMove, { passive: false });
+        window.addEventListener('touchend', onPointerUp);
+      }
+
+      function onPointerMove(e) {
+        if (!dragging) return;
+        const point = e.touches ? e.touches[0] : e;
+        const dx = point.clientX - startX;
+        const dy = point.clientY - startY;
+
+        if (!moved && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+          moved = true;
+          ensureLeftTopPositioning();
+        }
+
+        if (moved) {
+          if (e.cancelable) e.preventDefault(); // stop page scroll while dragging on touch
+          const { left, top } = clampToViewport(originLeft + dx, originTop + dy);
+          btn.style.left = left + 'px';
+          btn.style.top = top + 'px';
+        }
+      }
+
+      function onPointerUp() {
+        dragging = false;
+        btn.classList.remove('dragging');
+        window.removeEventListener('mousemove', onPointerMove);
+        window.removeEventListener('mouseup', onPointerUp);
+        window.removeEventListener('touchmove', onPointerMove);
+        window.removeEventListener('touchend', onPointerUp);
+
+        if (moved) {
+          // Save position so a real drag doesn't also fire the click/tap toggle
+          btn.dataset.justDragged = '1';
+          setTimeout(() => { btn.dataset.justDragged = '0'; }, 0);
+        }
+      }
+
+      // Keep the button on-screen if the window/orientation is resized
+      function onResize() {
+        if (btn.dataset.freePositioned !== '1') return;
+        const rect = btn.getBoundingClientRect();
+        const { left, top } = clampToViewport(rect.left, rect.top);
+        btn.style.left = left + 'px';
+        btn.style.top = top + 'px';
+      }
+
+      btn.addEventListener('mousedown', onPointerDown);
+      btn.addEventListener('touchstart', onPointerDown, { passive: true });
+      window.addEventListener('resize', onResize);
+
+      // Suppress the toggleToolbar() click that fires right after a real drag
+      btn.addEventListener('click', function (e) {
+        if (btn.dataset.justDragged === '1') {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+    })();
 
     function downloadJPG() {
       const target = document.getElementById('capture-area');
