@@ -262,8 +262,34 @@
 
       .news-section {
         margin-bottom: 0;
+        /* Don't lock the WHOLE section together — that forces big news
+           blocks onto a fresh page, splitting header/matter/footer apart.
+           Let it break, just avoid breaking right at the top edge. */
+        page-break-inside: auto;
+        break-inside: auto;
+      }
+
+      /* Keep only the small, indivisible pieces glued together */
+      .photo-wrap {
         page-break-inside: avoid;
         break-inside: avoid;
+      }
+
+      /* The long text itself must be ALLOWED to split across pages */
+      .matter {
+        page-break-inside: auto;
+        break-inside: auto;
+        orphans: 3;
+        widows: 3;
+      }
+
+      /* Prevent the headline being orphaned at the bottom of a page
+         right before the matter continues on the next */
+      .headline {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        page-break-after: avoid;
+        break-after: avoid;
       }
 
       .header {
@@ -276,12 +302,12 @@
 
       footer {
         page-break-inside: avoid;
+        break-inside: avoid;
       }
     }
 
     @media (max-width: 600px) {
-      .headline { font-size: 2rem; }
-      .matter { font-size: 1.15rem; }
+      .headline { font-size: 1.2rem; }
     }
 
 
