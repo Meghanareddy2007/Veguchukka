@@ -648,7 +648,7 @@
     document.getElementById('datebar').textContent = months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
     document.getElementById('yr').textContent = d.getFullYear();
 
-    document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    // document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     document.addEventListener('keydown', function (e) {
       const key = e.key ? e.key.toUpperCase() : '';
       if (e.key === 'F12') { e.preventDefault(); return; }
