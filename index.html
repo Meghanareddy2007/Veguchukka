@@ -311,7 +311,11 @@
         padding: 0;
         margin-bottom: 0;
       }
-
+      #capture-area{
+          width:100%;
+          max-width:900px;
+          margin:auto;
+      }
       .news-section {
         margin-bottom: 0;
         /* Don't lock the WHOLE section together — that forces big news
@@ -858,31 +862,58 @@
         }
       }, true);
     })();
-
     function downloadJPG() {
       const target = document.getElementById('capture-area');
       const pageEl = target.querySelector('.page');
       const uploadBtns = target.querySelectorAll('.upload-btn');
+    
       uploadBtns.forEach(el => el.style.visibility = 'hidden');
       pageEl.classList.add('capturing');
-
+    
+      // Save original styles
+      const oldWidth = target.style.width;
+      const oldMaxWidth = target.style.maxWidth;
+    
+      // Force desktop width for export
+      target.style.width = '900px';
+      target.style.maxWidth = '900px';
+    
       html2canvas(target, {
         backgroundColor: '#fdf8f0',
-        scale: 2,
+        scale: 3,
         useCORS: true,
         allowTaint: true,
-        logging: false
+        logging: false,
+        width: 900,
+        windowWidth: 900
       }).then(canvas => {
+    
+        target.style.width = oldWidth;
+        target.style.maxWidth = oldMaxWidth;
+    
         uploadBtns.forEach(el => el.style.visibility = '');
         pageEl.classList.remove('capturing');
+    
         const link = document.createElement('a');
-        link.download = 'veguchukka_' + d.getFullYear() + '_' + String(d.getMonth()+1).padStart(2,'0') + '_' + String(d.getDate()).padStart(2,'0') + '.jpg';
-        link.href = canvas.toDataURL('image/jpeg', 0.95);
+        link.download =
+          'veguchukka_' +
+          d.getFullYear() + '_' +
+          String(d.getMonth() + 1).padStart(2, '0') + '_' +
+          String(d.getDate()).padStart(2, '0') +
+          '.jpg';
+    
+        link.href = canvas.toDataURL('image/jpeg', 1.0);
         link.click();
+    
       }).catch(err => {
+    
+        target.style.width = oldWidth;
+        target.style.maxWidth = oldMaxWidth;
+    
         uploadBtns.forEach(el => el.style.visibility = '');
         pageEl.classList.remove('capturing');
-        alert('JPG డౌన్‌లోడ్ విఫలమైంది. మళ్ళీ ప్రయత్నించండి. / JPG download failed, please try again.');
+    
+        alert('JPG డౌన్‌లోడ్ విఫలమైంది. మళ్ళీ ప్రయత్నించండి.');
         console.error(err);
       });
     }
