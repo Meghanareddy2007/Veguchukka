@@ -231,12 +231,12 @@
       <label class="pm-label">Your Name (Reporter) *</label>
       <input id="pm-reporter" class="pm-field" type="text" placeholder="మీ పేరు" />
 
-      <label class="pm-label">API Token *
+      <!-- <label class="pm-label">API Token *
         <span style="font-size:10px;color:#888;font-weight:400;text-transform:none;letter-spacing:0">
           — Reporter Dashboard &#8594; "API టోకెన్ పొందండి"
         </span>
       </label>
-      <input id="pm-token" class="pm-field" type="text" placeholder="Paste your token here" style="font-family:monospace;font-size:12px" />
+      <input id="pm-token" class="pm-field" type="text" placeholder="Paste your token here" style="font-family:monospace;font-size:12px" /> -->
 
       <label class="pm-label">Category *</label>
       <select id="pm-category" class="pm-field">
@@ -460,7 +460,7 @@
 
       if(!server)   { pmStatus('Server URL నమోదు చేయండి.','err'); return; }
       if(!reporter)   { pmStatus('Reporter name నమోదు చేయండి.','err'); return; }
-      if(!token)      { pmStatus('API Token నమోదు చేయండి.','err'); return; }
+      // if(!token)      { pmStatus('API Token నమోదు చేయండి.','err'); return; }
       if(!category)   { pmStatus('Category ఎంచుకోండి.','err'); return; }
       if(!title||['HEADLINE','[శీర్షిక / HEADLINE]','[శీర్షిక]'].includes(title))
                       { pmStatus('Headline నమోదు చేయండి.','err'); return; }
