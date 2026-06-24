@@ -452,7 +452,7 @@
     async function submitToWebsite() {
       const server   = (document.getElementById('pm-server').value.trim()).replace(/\/$/, '') || 'http://localhost:5000';
       const reporter = document.getElementById('pm-reporter').value.trim();
-      const token    = document.getElementById('pm-token').value.trim();
+      // const token    = document.getElementById('pm-token').value.trim();
       const category = document.getElementById('pm-category').value;
       const summary  = document.getElementById('pm-summary').value.trim();
       const title    = document.querySelector('.headline[contenteditable]')?.innerText.trim()||'';
@@ -470,7 +470,7 @@
       btn.textContent='⏳ పంపుతున్నాం...'; btn.disabled=true;
       pmStatus('సర్వర్‌కి కనెక్ట్ అవుతున్నాం...','info');
 
-      const payload = { token, title, content, summary, category, reporter_name:reporter, image_data:getFirstImage() };
+      const payload = { title, content, summary, category, reporter_name:reporter, image_data:getFirstImage() };
 
       function reset() { btn.textContent='🚀 పంపండి'; btn.disabled=false; }
       try {
