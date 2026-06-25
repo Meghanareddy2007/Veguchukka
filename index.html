@@ -226,7 +226,7 @@
           — మీ Flask server address (e.g. http://localhost:5000)
         </span>
       </label>
-      <input id="pm-server" class="pm-field" type="url" placeholder="http://localhost:5000" value="http://localhost:5000" />
+      <input id="pm-server" class="pm-field" type="url" placeholder="https://veguchukka-apd9.onrender.com" value="https://veguchukka-apd9.onrender.com" />
 
       <label class="pm-label">Your Name (Reporter) *</label>
       <input id="pm-reporter" class="pm-field" type="text" placeholder="మీ పేరు" />
@@ -454,7 +454,7 @@
     }
 
     async function submitToWebsite() {
-      const server   = (document.getElementById('pm-server').value.trim()).replace(/\/$/, '') || 'http://localhost:5000';
+      const server   = (document.getElementById('pm-server').value.trim()).replace(/\/$/, '') || 'https://veguchukka-apd9.onrender.com';
       const reporter = document.getElementById('pm-reporter').value.trim();
       // const token    = document.getElementById('pm-token').value.trim();
       const category = document.getElementById('pm-category').value;
